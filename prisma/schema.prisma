@@ -4,15 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-// generator client {
-//   provider = "prisma-client-js"
-//   output   = "../generated/prisma"
-// }
 
-// datasource db {
-//   provider = "mysql"
-//   url      = env("DATABASE_URL")
-// }
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -21,4 +13,46 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  full_name String
+  password String
+  role Role @default(STUDENT)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Course {
+  id String @id @default(uuid())
+  title String 
+  module String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+} 
+
+model Exam {
+  id String @id @default(uuid())
+  title String
+  description String
+  exam_date DateTime
+ 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Enroll {
+  id String @id @default(ulid())
+  user_id String
+  course_id String
+  enrolled_at DateTime 
+}
+
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
 }

@@ -4,7 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -16,40 +15,79 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
   full_name String
-  password String
-  role Role @default(STUDENT)
+  password  String
+  role      Role     @default(STUDENT)
+  expert_in String?
+  // relation
+  techer_courses   Course[] @relation("TeacherCourses")
+  enrollments Enroll[]
+  results Result[]
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model Course {
-  id String @id @default(uuid())
-  title String 
-  module String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-} 
+  id         String   @id @default(uuid())
+  title      String
+  module     String
+  teacher_id String
+  //relation 
+  teacher    User     @relation("TeacherCourses", fields: [teacher_id], references: [id])
+  results    Result[]
+  exam Exam[]
+  enroll Enroll[]
 
-model Exam {
-  id String @id @default(uuid())
-  title String
-  description String
-  exam_date DateTime
- 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model Enroll {
-  id String @id @default(ulid())
-  user_id String
-  course_id String
-  enrolled_at DateTime 
+  id          String   @id @default(ulid())
+  student_id     String
+  course_id   String
+  enrolled_at DateTime
+// relation 
+  student User @relation(fields: [student_id] ,references: [id])
+  course Course @relation(fields: [course_id] , references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
+model Exam {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  exam_date   DateTime
+  course_id    String
+  // relation
+  course Course @relation(fields: [course_id] , references: [id])
+  Result     Result[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model Result {
+  id         String  @id @default(uuid())
+  marks      Int?
+  status     String?
+  exam_id    String
+  student_id String
+  course_id   String?
+  // relation
+  exam       Exam?    @relation(fields: [exam_id], references: [id])
+  student    User?    @relation(fields: [student_id], references: [id])
+  Course     Course?  @relation(fields: [course_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
 
 enum Role {
   ADMIN

@@ -55,6 +55,19 @@ export class AuthService {
     return this.generateToken(existUser);
   }
 
+  // get all
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        full_name: true,
+        email: true,
+        role: true,
+        expert_in: true,
+      },
+    });
+  }
+
   //update
   async update(id: string, dto: UpdateUserDto) {
     const existUser = await this.prisma.user.findUnique({
@@ -75,8 +88,23 @@ export class AuthService {
         full_name: true,
         email: true,
         expert_in: true,
+        role: true,
       },
     });
+  }
+
+  //delete
+  async delete(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    await this.prisma.user.delete({
+      where: { id },
+    });
+
+    return { message: 'User deleted successfully' };
   }
 
   // generate access token by user details

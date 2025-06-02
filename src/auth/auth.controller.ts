@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -13,6 +16,17 @@ import {
   UpdateUserDto,
 } from './dto/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Roles } from './decorators/roles.decorator';
+import { Role } from 'generated/prisma';
+import { RoleGuard } from './guards/role.guard';
+import { Request } from 'express';
+import { UserPayload } from 'src/interface/user-payload.interface';
+
+declare module 'express' {
+  interface Request {
+    user?: UserPayload;
+  }
+}
 
 @Controller('administrator')
 export class AuthController {
@@ -30,9 +44,33 @@ export class AuthController {
   }
 
   //updata
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.authService.update(id, dto);
+  }
+
+  // get all user
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('all')
+  getAll() {
+    return this.authService.getAllUsers();
+  }
+
+  // get me
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('me')
+  getProfile(@Req() req: Request) {
+    return req.user;
+  }
+
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.authService.delete(id);
   }
 }

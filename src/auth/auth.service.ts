@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, LoginUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from 'generated/prisma';
 
@@ -11,6 +11,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
+  //signup
   async signUp(dto: CreateUserDto) {
     const existUser = await this.prisma.user.findUnique({
       where: {
@@ -32,6 +33,25 @@ export class AuthService {
     this.generateToken(user);
   }
 
+  //signin
+  async signin(dto: LoginUserDto) {
+    const existUser = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (
+      !existUser ||
+      !(await bcrypt.compare(dto.password, existUser.password))
+    ) {
+      throw new UnauthorizedException('invalid credentials');
+    }
+
+    return this.generateToken(existUser);
+  }
+
+  // generate access token by user details
   private generateToken(user: User) {
     const payload = {
       sub: user.id,

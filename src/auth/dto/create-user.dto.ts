@@ -29,3 +29,14 @@ export class CreateUserDto {
   @IsString()
   expert_in?: string;
 }
+
+export class LoginUserDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(6)
+  password: string;
+}

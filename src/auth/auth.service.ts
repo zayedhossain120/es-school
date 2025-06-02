@@ -1,7 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto, LoginUserDto } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  LoginUserDto,
+  UpdateUserDto,
+} from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from 'generated/prisma';
 
@@ -49,6 +53,30 @@ export class AuthService {
     }
 
     return this.generateToken(existUser);
+  }
+
+  //update
+  async update(id: string, dto: UpdateUserDto) {
+    const existUser = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!existUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.prisma.user.update({
+      where: { id: id },
+      data: {
+        full_name: dto.full_name,
+        expert_in: dto.expert_in,
+      },
+      select: {
+        full_name: true,
+        email: true,
+        expert_in: true,
+      },
+    });
   }
 
   // generate access token by user details

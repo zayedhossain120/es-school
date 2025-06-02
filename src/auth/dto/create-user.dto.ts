@@ -40,3 +40,13 @@ export class LoginUserDto {
   @MinLength(6)
   password: string;
 }
+
+export class UpdateUserDto {
+  @IsOptional()
+  @IsString()
+  full_name?: string;
+
+  @IsOptional()
+  @IsString()
+  expert_in?: string;
+}

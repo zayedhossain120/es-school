@@ -22,7 +22,6 @@ export class AuthService {
     }
 
     const hashPassword = await bcrypt.hash(dto.password, 10);
-    console.log(hashPassword);
     const user = await this.prisma.user.create({
       data: {
         ...dto,
@@ -34,7 +33,6 @@ export class AuthService {
   }
 
   private generateToken(user: User) {
-    console.log(user);
     const payload = {
       sub: user.id,
       email: user.email,
@@ -44,9 +42,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        full_name: user.full_name,
-        email: user.email,
-        role: user.role,
+        ...payload,
       },
     };
   }

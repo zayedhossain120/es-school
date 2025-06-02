@@ -1,12 +1,20 @@
-import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   CreateUserDto,
   LoginUserDto,
   UpdateUserDto,
 } from './dto/create-user.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-@Controller('auth')
+@Controller('administrator')
 export class AuthController {
   constructor(private authService: AuthService) {}
   // signup
@@ -22,6 +30,7 @@ export class AuthController {
   }
 
   //updata
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.authService.update(id, dto);

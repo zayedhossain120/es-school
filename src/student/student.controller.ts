@@ -14,7 +14,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import {
   CreateUserDto,
   LoginUserDto,
-  UpdatePassword,
+  UpdatePasswordDto,
   UpdateUserDto,
 } from 'src/auth/dto/create-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -55,9 +55,9 @@ export class StudentController {
   // update password
   @Roles(Role.TEACHER, Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Patch(':id')
+  @Patch('password/:id')
   updatePassword(
-    @Body() dto: UpdatePassword,
+    @Body() dto: UpdatePasswordDto,
     @Param('id') id: string,
     @Req() req: Request,
   ) {

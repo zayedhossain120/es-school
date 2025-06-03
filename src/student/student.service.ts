@@ -4,7 +4,7 @@ import { Role, User } from 'generated/prisma';
 import {
   CreateUserDto,
   LoginUserDto,
-  UpdatePassword,
+  UpdatePasswordDto,
   UpdateUserDto,
 } from 'src/auth/dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -46,7 +46,7 @@ export class StudentService {
     });
     if (
       !existUser ||
-      (await bcrypt.compare(existUser.password, dto.password))
+      !(await bcrypt.compare(dto.password, existUser.password))
     ) {
       throw new UnauthorizedException('Credetial not match');
     }
@@ -101,7 +101,7 @@ export class StudentService {
   // update password
   async updatePassword(
     id: string,
-    dto: UpdatePassword,
+    dto: UpdatePasswordDto,
     currentUser: UserPayload,
   ) {
     const existUser = await this.prisma.user.findUnique({
@@ -118,16 +118,30 @@ export class StudentService {
         throw new UnauthorizedException('Credential not match');
       }
 
-      const hashPassword = bcrypt.hash(dto.new_password, 10);
+      const hashPassword = await bcrypt.hash(dto.new_password, 10);
+      return this.prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          password: hashPassword,
+        },
+      });
     }
 
     if (currentUser.role === Role.TEACHER) {
-      if (
-        !existUser ||
-        (await bcrypt.compare(dto.old_password, existUser.password))
-      ) {
+      if (!existUser) {
         throw new UnauthorizedException('Credential not match');
       }
+      const hashPassword = await bcrypt.hash(dto.new_password, 10);
+      return this.prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          password: hashPassword,
+        },
+      });
     }
   }
 

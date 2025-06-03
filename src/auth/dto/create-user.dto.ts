@@ -51,13 +51,11 @@ export class UpdateUserDto {
   expert_in?: string;
 }
 
-export class UpdatePassword {
-  @IsNotEmpty()
+export class UpdatePasswordDto {
   @IsString()
   @MinLength(6)
   old_password: string;
 
-  @IsNotEmpty()
   @IsString()
   @MinLength(6)
   new_password: string;

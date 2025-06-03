@@ -4,6 +4,7 @@ import { Role, User } from 'generated/prisma';
 import {
   CreateUserDto,
   LoginUserDto,
+  UpdatePassword,
   UpdateUserDto,
 } from 'src/auth/dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -65,16 +66,69 @@ export class StudentService {
       if (currentUser.id !== id) {
         throw new UnauthorizedException('You can just update your own profile');
       }
+      return this.prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          full_name: dto.full_name,
+        },
+        select: {
+          full_name: true,
+          email: true,
+          id: true,
+        },
+      });
     }
 
-    return this.prisma.user.update({
-      where: {
-        id: id,
-      },
-      data: {
-        full_name: dto.full_name,
-      },
+    if (currentUser.role === Role.TEACHER) {
+      return this.prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          full_name: dto.full_name,
+        },
+        select: {
+          full_name: true,
+          email: true,
+          id: true,
+        },
+      });
+    }
+  }
+
+  // update password
+  async updatePassword(
+    id: string,
+    dto: UpdatePassword,
+    currentUser: UserPayload,
+  ) {
+    const existUser = await this.prisma.user.findUnique({
+      where: { id: id },
     });
+    if (currentUser.role === Role.STUDENT) {
+      if (currentUser.id !== id) {
+        throw new UnauthorizedException('You can just update your profile');
+      }
+      if (
+        !existUser ||
+        (await bcrypt.compare(dto.old_password, existUser.password))
+      ) {
+        throw new UnauthorizedException('Credential not match');
+      }
+
+      const hashPassword = bcrypt.hash(dto.new_password, 10);
+    }
+
+    if (currentUser.role === Role.TEACHER) {
+      if (
+        !existUser ||
+        (await bcrypt.compare(dto.old_password, existUser.password))
+      ) {
+        throw new UnauthorizedException('Credential not match');
+      }
+    }
   }
 
   // generate access token by user details

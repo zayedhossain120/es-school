@@ -14,6 +14,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import {
   CreateUserDto,
   LoginUserDto,
+  UpdatePassword,
   UpdateUserDto,
 } from 'src/auth/dto/create-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -49,5 +50,18 @@ export class StudentController {
   ) {
     const currentUser = req.user as UserPayload;
     return this.studentService.update(id, dto, currentUser);
+  }
+
+  // update password
+  @Roles(Role.TEACHER, Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Patch(':id')
+  updatePassword(
+    @Body() dto: UpdatePassword,
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    const currentUser = req.user as UserPayload;
+    return this.studentService.updatePassword(id, dto, currentUser);
   }
 }

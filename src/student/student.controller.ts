@@ -29,7 +29,7 @@ export class StudentController {
 
   // create student
   @Roles(Role.TEACHER)
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('signup')
   create(@Body() dto: CreateUserDto) {
     return this.studentService.signup(dto);

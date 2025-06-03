@@ -53,6 +53,38 @@ export class StudentService {
     return this.generateToken(existUser);
   }
 
+  // get all student
+  async getAllStudent() {
+    return this.prisma.user.findMany({
+      where: {
+        role: Role.STUDENT,
+      },
+      select: {
+        id: true,
+        full_name: true,
+        email: true,
+        role: true,
+        expert_in: true,
+      },
+    });
+  }
+
+  //get student
+  async getStudent(id: string) {
+    return this.prisma.user.findMany({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        full_name: true,
+        email: true,
+        role: true,
+        expert_in: true,
+      },
+    });
+  }
+
   // update student
   async update(id: string, dto: UpdateUserDto, currentUser: UserPayload) {
     const existUser = await this.prisma.user.findUnique({
@@ -119,7 +151,7 @@ export class StudentService {
       }
 
       const hashPassword = await bcrypt.hash(dto.new_password, 10);
-      return this.prisma.user.update({
+      await this.prisma.user.update({
         where: {
           id: id,
         },
@@ -127,6 +159,9 @@ export class StudentService {
           password: hashPassword,
         },
       });
+      return {
+        message: 'Update password successfully',
+      };
     }
 
     if (currentUser.role === Role.TEACHER) {
@@ -134,7 +169,7 @@ export class StudentService {
         throw new UnauthorizedException('Credential not match');
       }
       const hashPassword = await bcrypt.hash(dto.new_password, 10);
-      return this.prisma.user.update({
+      await this.prisma.user.update({
         where: {
           id: id,
         },
@@ -142,7 +177,25 @@ export class StudentService {
           password: hashPassword,
         },
       });
+      return {
+        message: 'Update password successfully',
+      };
     }
+  }
+
+  async delete(id: string) {
+    const existUser = await this.prisma.user.delete({
+      where: { id: id },
+    });
+    if (!existUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    await this.prisma.user.delete({
+      where: { id: id },
+    });
+    return {
+      message: 'User deleted successfully',
+    };
   }
 
   // generate access token by user details

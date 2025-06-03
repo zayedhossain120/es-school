@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -52,6 +54,22 @@ export class StudentController {
     return this.studentService.update(id, dto, currentUser);
   }
 
+  //get all student
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('all')
+  getAllStudent() {
+    return this.studentService.getAllStudent();
+  }
+
+  // get a student
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get(':id')
+  getStudent(@Param('id') id: string) {
+    return this.studentService.getStudent(id);
+  }
+
   // update password
   @Roles(Role.TEACHER, Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -63,5 +81,12 @@ export class StudentController {
   ) {
     const currentUser = req.user as UserPayload;
     return this.studentService.updatePassword(id, dto, currentUser);
+  }
+  // delete student
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.studentService.delete(id);
   }
 }

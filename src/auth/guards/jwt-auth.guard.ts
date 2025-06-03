@@ -6,16 +6,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { Role } from 'generated/prisma';
+import { UserPayload } from 'src/interface/user-payload.interface';
 
-interface JwtPayload {
-  sub: string;
-  email: string;
-  full_name: string;
-  role: Role;
-  iat?: number;
-  exp?: number;
-}
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
@@ -31,7 +23,7 @@ export class JwtAuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
 
     try {
-      const payload: JwtPayload = this.jwtService.verify(token, {
+      const payload: UserPayload = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET,
       });
       request['user'] = payload;

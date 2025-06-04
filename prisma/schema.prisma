@@ -66,7 +66,7 @@ model Exam {
   course_id    String
   // relation
   course Course @relation(fields: [course_id] , references: [id])
-  Result     Result[]
+  Result     Result[]       
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -76,10 +76,11 @@ model Exam {
 model Result {
   id         String  @id @default(uuid())
   marks      Int?
-  status     String?
+  status     Status @default(PENDING)
   exam_id    String
   student_id String
-  course_id   String?
+  answer  String
+  course_id   String
   // relation
   exam       Exam?    @relation(fields: [exam_id], references: [id])
   student    User?    @relation(fields: [student_id], references: [id])
@@ -93,4 +94,11 @@ enum Role {
   ADMIN
   TEACHER
   STUDENT
+}
+
+enum Status {
+  PENDING
+  FAILED
+  PASSED
+  ABSENT
 }

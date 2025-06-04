@@ -49,7 +49,7 @@ model Enroll {
   id          String   @id @default(ulid())
   student_id     String
   course_id   String
-  enrolled_at DateTime
+  enrolled_at DateTime @default(now())
 // relation 
   student User @relation(fields: [student_id] ,references: [id])
   course Course @relation(fields: [course_id] , references: [id])

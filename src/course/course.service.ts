@@ -28,6 +28,7 @@ export class CourseService {
         id: true,
         title: true,
         teacher_id: true,
+        _count: true,
       },
     });
   }
@@ -47,6 +48,24 @@ export class CourseService {
     return this.prisma.course.update({
       where: { id },
       data: dto,
+    });
+  }
+
+  // get a course by id
+  async getCourseById(id: string) {
+    return this.prisma.course.findUnique({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+        title: true,
+        module: true,
+        teacher_id: true,
+        created_at: true,
+        updated_at: true,
+        _count: true,
+      },
     });
   }
 

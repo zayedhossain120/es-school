@@ -50,6 +50,14 @@ export class CourseController {
     return this.courseService.getAllCourse();
   }
 
+  //get a course
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.TEACHER)
+  @Get(':id')
+  getCourseById(@Param('id') id: string) {
+    return this.courseService.getCourseById(id);
+  }
+
   //delete course
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.TEACHER)

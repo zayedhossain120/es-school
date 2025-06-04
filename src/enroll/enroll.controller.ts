@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { EnrollService } from './enroll.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'generated/prisma';
@@ -12,12 +20,36 @@ import { UserPayload } from 'src/interface/user-payload.interface';
 export class EnrollController {
   constructor(private readonly enrollService: EnrollService) {}
 
-  // enroll a course
+  // enroll a course by student
   @Roles(Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Post('create')
   create(@Body() dto: CreateEnrollDto, @Req() req: Request) {
     const currentUser = req.user as UserPayload;
     return this.enrollService.create(dto, currentUser);
+  }
+
+  // get my enrolled for student
+  @Roles(Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('me')
+  getMyEnroll(@Req() req: Request) {
+    const currentUser = req.user as UserPayload;
+    return this.enrollService.getMyEnroll(currentUser);
+  }
+
+  // get all enroll by teache
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('all')
+  getAll() {
+    return this.enrollService.getAll();
+  }
+  // get all enroll by teache
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get(':id')
+  getById(@Param('id') id: string) {
+    return this.enrollService.getById(id);
   }
 }

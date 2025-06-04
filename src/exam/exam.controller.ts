@@ -15,6 +15,7 @@ import { RoleGuard } from 'src/auth/guards/role.guard';
 import { CreateExamDto } from './dto/exam.dto';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { CreateResultDto } from 'src/result/dto/result.dto';
 
 @Controller('exam')
 export class ExamController {
@@ -46,4 +47,10 @@ export class ExamController {
   }
 
   // participant exam for student
+  @Roles(Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Post('participant')
+  participant(@Body() dto: CreateResultDto) {
+    return this.examService.participant(dto);
+  }
 }

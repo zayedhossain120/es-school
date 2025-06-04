@@ -6,7 +6,12 @@ import {
   IsInt,
   IsEnum,
 } from 'class-validator';
-import { Status } from 'generated/prisma';
+
+export enum Status {
+  PASSED = 'PASSED',
+  FAILED = 'FAILED',
+  PENDING = 'PENDING',
+}
 
 export class CreateResultDto {
   @IsUUID()

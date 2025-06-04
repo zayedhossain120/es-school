@@ -65,6 +65,12 @@ export class EnrollService {
       where: {
         student_id: currentUser.id,
       },
+      select: {
+        student_id: true,
+        course_id: true,
+        created_at: true,
+        course: true,
+      },
     });
   }
 }

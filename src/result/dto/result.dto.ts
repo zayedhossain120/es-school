@@ -38,3 +38,13 @@ export class CreateResultDto {
   @IsEnum(Status)
   status?: Status;
 }
+
+export class UpdateResultDto {
+  @IsOptional()
+  @IsInt()
+  marks?: number;
+
+  @IsOptional()
+  @IsEnum(Status)
+  status?: Status;
+}

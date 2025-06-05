@@ -30,18 +30,6 @@ export class CourseController {
     return this.courseService.createCourse(dto, currentUser);
   }
 
-  //update course
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.TEACHER)
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateCourseDto,
-    @Req() req: Request,
-  ) {
-    const currentUser = req.user as UserPayload;
-    return this.courseService.updateCourse(id, dto, currentUser);
-  }
   //get all course
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.TEACHER)
@@ -56,6 +44,19 @@ export class CourseController {
   @Get(':id')
   getCourseById(@Param('id') id: string) {
     return this.courseService.getCourseById(id);
+  }
+
+  //update course
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.TEACHER)
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCourseDto,
+    @Req() req: Request,
+  ) {
+    const currentUser = req.user as UserPayload;
+    return this.courseService.updateCourse(id, dto, currentUser);
   }
 
   //delete course

@@ -31,6 +31,7 @@ export class StudentService {
       data: {
         ...dto,
         password: hashPassword,
+        is_active: true,
       },
     });
 
@@ -81,6 +82,12 @@ export class StudentService {
         email: true,
         role: true,
         expert_in: true,
+        _count: true,
+        created_at: true,
+        enrollments: true,
+        techer_courses: true,
+        results: true,
+        is_active: true,
       },
     });
   }

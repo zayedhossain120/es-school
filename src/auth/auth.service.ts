@@ -31,10 +31,11 @@ export class AuthService {
       data: {
         ...dto,
         password: hashPassword,
+        is_active: true,
       },
     });
 
-    this.generateToken(user);
+    return this.generateToken(user);
   }
 
   //signin

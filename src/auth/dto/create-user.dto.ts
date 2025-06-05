@@ -5,6 +5,7 @@ import {
   IsString,
   IsEnum,
   MinLength,
+  IsBoolean,
 } from 'class-validator';
 import { Role } from 'generated/prisma';
 
@@ -49,6 +50,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   expert_in?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean;
 }
 
 export class UpdatePasswordDto {

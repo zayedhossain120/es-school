@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateResultDto } from './dto/result.dto';
+import { UserPayload } from 'src/interface/user-payload.interface';
 
 @Injectable()
 export class ResultService {
@@ -28,6 +29,13 @@ export class ResultService {
       data: {
         ...dto,
       },
+    });
+  }
+
+  // my result for studnt
+  async myResult(currentUser: UserPayload) {
+    return this.prisma.result.findMany({
+      where: { student_id: currentUser.id },
     });
   }
 }

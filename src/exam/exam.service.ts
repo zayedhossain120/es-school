@@ -60,6 +60,17 @@ export class ExamService {
 
   // exam participant for student
   async participant(dto: CreateResultDto) {
+    const existingResult = await this.prisma.result.findFirst({
+      where: {
+        student_id: dto.student_id,
+        exam_id: dto.exam_id,
+      },
+    });
+
+    if (existingResult) {
+      throw new Error('You have already participated in this exam.');
+    }
+
     return this.prisma.result.create({
       data: {
         ...dto,

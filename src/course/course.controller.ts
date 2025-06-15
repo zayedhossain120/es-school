@@ -31,16 +31,12 @@ export class CourseController {
   }
 
   //get all course
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.TEACHER)
   @Get('all')
   getAllCourse() {
     return this.courseService.getAllCourse();
   }
 
   //get a course
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.TEACHER)
   @Get(':id')
   getCourseById(@Param('id') id: string) {
     return this.courseService.getCourseById(id);

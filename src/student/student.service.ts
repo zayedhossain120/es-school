@@ -197,12 +197,9 @@ export class StudentService {
     if (!existUser) {
       throw new UnauthorizedException('User not found');
     }
-    await this.prisma.user.delete({
+    return await this.prisma.user.delete({
       where: { id: id },
     });
-    return {
-      message: 'User deleted successfully',
-    };
   }
 
   // generate access token by user details

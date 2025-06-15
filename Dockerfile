@@ -1,19 +1,17 @@
-FROM node:20
+# Dockerfile
+FROM node:20-alpine
 
 WORKDIR /app
 
-# 1️⃣ Install deps first (include dev deps so prisma CLI is there)
+# Install dependencies
 COPY package*.json ./
-RUN npm ci --include=dev       # or: RUN npm install
+RUN npm ci --include=dev
 
-# 2️⃣ Generate the client (uses the CLI we just installed)
+# Copy rest of the app
+COPY . .
+
+# Run prisma generate
 RUN npx prisma generate
 
-# 3️⃣ Copy source and build
-COPY . .
-RUN npm run build
-
-# Optional: strip dev deps from the final layer
-RUN npm prune --production
-
-CMD ["node","dist/main.js"]
+# Then build or start
+CMD ["npm", "run", "start"]

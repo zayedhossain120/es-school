@@ -4,13 +4,21 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { map, Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Response } from 'express';
+
+interface Meta {
+  total: number;
+  page: number;
+  lastPage?: number;
+  limit: number;
+}
 
 interface SuccessResponse<T> {
   statusCode: number;
   success: boolean;
   message: string;
+  meta?: Meta;
   data: T;
 }
 
@@ -23,25 +31,32 @@ export class SuccessResponseInterceptor<T>
     next: CallHandler<T>,
   ): Observable<SuccessResponse<T>> {
     const response = context.switchToHttp().getResponse<Response>();
-
     return next.handle().pipe(
-      map((data: T | { message?: string; data?: T }) => {
+      map<T, SuccessResponse<T>>((data) => {
         let responseData: T;
-        let message: string;
+        let message = 'Request successful';
+        let meta: Meta | undefined;
 
-        if (typeof data === 'object' && data !== null && 'data' in data) {
-          // @ts-expect-error - we ensure data has `data` and `message`
-          responseData = data.data;
-          message = data.message ?? 'Request successful';
+        if (typeof data === 'object' && data !== null) {
+          if ('data' in data) {
+            responseData = (data as any).data;
+            message = (data as any).message ?? message;
+          } else {
+            responseData = data as T;
+          }
+
+          if ('meta' in data) {
+            meta = (data as any).meta;
+          }
         } else {
           responseData = data as T;
-          message = 'Request successful';
         }
 
         return {
           statusCode: response.statusCode,
           success: true,
           message,
+          ...(meta ? { meta } : {}),
           data: responseData,
         };
       }),

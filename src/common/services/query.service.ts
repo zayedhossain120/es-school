@@ -18,12 +18,14 @@ export class QueryEngine {
       raw.limit,
       schema.defaultLimit,
     );
-    const { orderBy } = this.sort(
+
+    const { orderBy } = this.sort<OrderBy>(
       raw.sortBy,
       raw.sortOrder,
-      schema.defaultSort,
+      schema.defaultSort!,
     );
-    const where = this.filter<Where>(raw, schema);
+
+    const where = this.filter<Where, OrderBy>(raw, schema);
 
     return { where, orderBy, skip, take, page, limit };
   }
@@ -35,40 +37,43 @@ export class QueryEngine {
     return { skip, take: l, page: p, limit: l };
   }
 
-  private sort(
-    sortBy = 'createdAt',
-    sortOrder: any = 'desc',
-    def: any = 'createdAt',
-  ) {
-    const column = sortBy || def;
-    const dir = sortOrder === 'asc' ? 'asc' : 'desc';
-    return { orderBy: { [column]: dir } };
+  /* ---------- Sorting -------------------------------------------- */
+  private sort<OrderBy extends Record<string, unknown>>(
+    sortBy: string | undefined,
+    sortOrder: string | undefined,
+    defaultColumn: keyof OrderBy,
+  ): { orderBy: Partial<OrderBy> } {
+    const column = (sortBy as keyof OrderBy) ?? defaultColumn;
+    const dir: 'asc' | 'desc' = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    /* only ONE property, typed as Partial<OrderBy> */
+    return {
+      orderBy: { [column]: dir } as Partial<OrderBy>,
+    };
   }
 
-  private filter<Where>(
+  private filter<Where, OrderBy>(
     raw: Record<string, any>,
-    { searchable, filterable }: QuerySchema<Where, any>,
+    { searchable, filterable }: QuerySchema<Where, OrderBy>,
   ): Where {
     const where: Record<string, any> = {};
 
     for (const key of filterable) {
       const v = raw[key as string] as string;
       if (v !== undefined && v !== '') {
-        where[key as string] =
-          typeof v === 'string' ? { contains: v, mode: 'insensitive' } : v;
+        where[key as string] = typeof v === 'string' ? { contains: v } : v;
       }
     }
 
     if (raw.searchTerms) {
       where.OR = searchable.map((col) => ({
-        [col]: { contains: raw.searchTerms as string, mode: 'insensitive' },
+        [col]: { contains: raw.searchTerms as string },
       }));
     }
 
     return where as Where;
   }
 
-  /** Optional: Standard paginated response formatter */
   public formatPaginatedResponse<T>(
     data: T[],
     total: number,
@@ -76,10 +81,9 @@ export class QueryEngine {
     limit: number,
   ) {
     return {
+      meta: { total, page, limit }, //lastPage: Math.ceil(total / limit)
+
       data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
     };
   }
 }

@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -32,8 +33,9 @@ export class CourseController {
 
   //get all course
   @Get('all')
-  getAllCourse() {
-    return this.courseService.getAllCourse();
+  getAllCourse(@Query() raw: Record<string, any>) {
+    // console.log(raw);
+    return this.courseService.getAllCourse(raw);
   }
 
   //get a course

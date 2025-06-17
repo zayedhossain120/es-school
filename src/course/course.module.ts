@@ -3,10 +3,12 @@ import { CourseService } from './course.service';
 import { CourseController } from './course.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
     ConfigModule,
+    CommonModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

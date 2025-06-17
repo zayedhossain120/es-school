@@ -2,11 +2,15 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
-import { Role } from 'generated/prisma';
+import { Prisma, Role } from 'generated/prisma';
+import { QueryEngine } from 'src/common/services/query.service';
 
 @Injectable()
 export class CourseService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private qe: QueryEngine,
+  ) {}
   // create course
   async createCourse(dto: CreateCourseDto, currentUser: UserPayload) {
     if (currentUser.role !== Role.TEACHER) {
@@ -22,18 +26,94 @@ export class CourseService {
   }
 
   //get all course
-  async getAllCourse() {
-    return this.prisma.course.findMany({
-      select: {
-        id: true,
-        title: true,
-        teacher_id: true,
-        _count: true,
-      },
-    });
-  }
+  // async getAllCourse() {
+  //   return this.prisma.course.findMany({
+  //     select: {
+  //       id: true,
+  //       title: true,
+  //       teacher_id: true,
+  //       _count: true,
+  //     },
+  //   });
+  // }
+
+  /* ───────── getAllCourse with query support ───────── */
+  // async getAllCourse(raw: Record<string, any>) {
+  //   const q = this.qe.build<
+  //     Prisma.CourseWhereInput,
+  //     Prisma.CourseOrderByWithRelationInput
+  //   >(raw, {
+  //     searchable: ['title', 'module'],
+  //     filterable: ['title', 'module', 'teacher_id'],
+  //     defaultSort: 'created_at',
+  //     defaultLimit: 10,
+  //   });
+
+  //   const [data, total] = await this.prisma.$transaction([
+  //     this.prisma.course.findMany({
+  //       where: q.where,
+  //       orderBy: q.orderBy,
+  //       skip: q.skip,
+  //       take: q.take,
+  //       select: {
+  //         id: true,
+  //         title: true,
+  //         module: true,
+  //         teacher_id: true,
+  //         _count: {
+  //           // ✅ fixed
+  //           select: {
+  //             results: true,
+  //             exam: true,
+  //             enroll: true,
+  //           },
+  //         },
+  //       },
+  //     }),
+  //     this.prisma.course.count({ where: q.where }),
+  //   ]);
+
+  //   return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
+  // }
 
   // update course
+
+  async getAllCourse(raw: Record<string, any>) {
+    const q = this.qe.build<
+      Prisma.CourseWhereInput,
+      Prisma.CourseOrderByWithRelationInput
+    >(raw, {
+      searchable: ['title', 'module'],
+      filterable: ['title', 'module', 'teacher_id'],
+      defaultSort: 'created_at',
+      defaultLimit: 10,
+    });
+
+    try {
+      const [data, total] = await this.prisma.$transaction([
+        this.prisma.course.findMany({
+          where: q.where,
+          orderBy: q.orderBy,
+          skip: q.skip,
+          take: q.take,
+          select: {
+            id: true,
+            title: true,
+            module: true,
+            teacher_id: true,
+            // _count: true,
+          },
+        }),
+        this.prisma.course.count({ where: q.where }),
+      ]);
+
+      return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
+    } catch (err) {
+      console.error('CourseService.getAllCourse error ➜', err);
+      throw err;
+    }
+  }
+
   async updateCourse(
     id: string,
     dto: UpdateCourseDto,

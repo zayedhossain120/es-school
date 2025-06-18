@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -22,6 +23,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { GetStudentsQueryDto } from './dto/student-query.dto';
 
 @Controller('student')
 export class StudentController {
@@ -58,8 +60,8 @@ export class StudentController {
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get('all')
-  getAllStudent() {
-    return this.studentService.getAllStudent();
+  getAllStudent(@Query() raw: GetStudentsQueryDto) {
+    return this.studentService.getAllStudent(raw);
   }
 
   // get a student

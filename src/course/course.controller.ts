@@ -18,6 +18,7 @@ import { Role } from 'generated/prisma';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
 import { Request } from 'express';
+import { GetCoursesQueryDto } from './dto/courses-query.dto';
 
 @Controller('course')
 export class CourseController {
@@ -33,8 +34,7 @@ export class CourseController {
 
   //get all course
   @Get('all')
-  getAllCourse(@Query() raw: Record<string, any>) {
-    // console.log(raw);
+  getAllCourse(@Query() raw: GetCoursesQueryDto) {
     return this.courseService.getAllCourse(raw);
   }
 

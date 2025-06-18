@@ -4,6 +4,7 @@ import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
 import { Prisma, Role } from 'generated/prisma';
 import { QueryEngine } from 'src/common/services/query.service';
+import { GetCoursesQueryDto } from './dto/courses-query.dto';
 
 @Injectable()
 export class CourseService {
@@ -78,7 +79,7 @@ export class CourseService {
 
   // update course
 
-  async getAllCourse(raw: Record<string, any>) {
+  async getAllCourse(raw: GetCoursesQueryDto) {
     const q = this.qe.build<
       Prisma.CourseWhereInput,
       Prisma.CourseOrderByWithRelationInput

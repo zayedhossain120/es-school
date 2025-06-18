@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Role, User } from 'generated/prisma';
+import { Prisma, Role, User } from 'generated/prisma';
 import {
   CreateUserDto,
   LoginUserDto,
@@ -10,12 +10,15 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { QueryEngine } from 'src/common/services/query.service';
+import { GetStudentsQueryDto } from './dto/student-query.dto';
 
 @Injectable()
 export class StudentService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private qe: QueryEngine,
   ) {}
 
   //create student
@@ -55,17 +58,28 @@ export class StudentService {
   }
 
   // get all student
-  async getAllStudent() {
+  async getAllStudent(raw: GetStudentsQueryDto) {
+    const q = this.qe.build<
+      Prisma.UserWhereInput,
+      Prisma.UserOrderByWithRelationInput
+    >(raw, {
+      searchable: ['full_name', 'email'],
+      filterable: ['full_name', 'email', 'role', 'is_active'],
+      defaultSort: 'created_at',
+      defaultLimit: 10,
+    });
+
     return this.prisma.user.findMany({
-      where: {
-        role: Role.STUDENT,
-      },
+      where: { ...q.where, role: Role.STUDENT },
+      orderBy: q.orderBy,
+      skip: q.skip,
+      take: q.take,
       select: {
         id: true,
         full_name: true,
         email: true,
         role: true,
-        expert_in: true,
+        is_active: true,
       },
     });
   }

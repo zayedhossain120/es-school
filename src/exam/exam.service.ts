@@ -9,7 +9,7 @@ export class ExamService {
   constructor(private readonly prisma: PrismaService) {}
   // create exam
   async create(dto: CreateExamDto) {
-    // check course availabity
+    // check course availability
     const existCourse = await this.prisma.course.findUnique({
       where: {
         id: dto.course_id,

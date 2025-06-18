@@ -95,13 +95,11 @@ export class StudentService {
         full_name: true,
         email: true,
         role: true,
-        expert_in: true,
-        _count: true,
         created_at: true,
         enrollments: true,
-        teacher_courses: true,
         results: true,
         is_active: true,
+        _count: true,
       },
     });
   }
@@ -204,6 +202,7 @@ export class StudentService {
     }
   }
 
+  // delete student
   async delete(id: string) {
     const existUser = await this.prisma.user.delete({
       where: { id: id },
@@ -225,11 +224,14 @@ export class StudentService {
       role: user.role,
     };
     return {
-      access_token: this.jwtService.sign(payload),
       user: {
-        ...payload,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
         id: user.id,
+        is_active: user.is_active,
       },
+      access_token: this.jwtService.sign(payload),
     };
   }
 }

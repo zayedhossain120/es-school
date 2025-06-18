@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, Role, User } from 'generated/prisma';
 import {
@@ -27,7 +33,7 @@ export class StudentService {
       where: { email: dto.email },
     });
     if (existUser) {
-      throw new UnauthorizedException('User alreday exist');
+      throw new ConflictException('User alreday exist');
     }
     const hashPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
@@ -52,7 +58,7 @@ export class StudentService {
       !existUser ||
       !(await bcrypt.compare(dto.password, existUser.password))
     ) {
-      throw new UnauthorizedException('Credetial not match');
+      throw new UnauthorizedException('Credential not match');
     }
     return this.generateToken(existUser);
   }
@@ -115,12 +121,12 @@ export class StudentService {
       where: { id: id },
     });
     if (!existUser) {
-      throw new UnauthorizedException('User not found');
+      throw new NotFoundException('User not found');
     }
     // role-base access togic
     if (currentUser.role === Role.STUDENT) {
       if (currentUser.id !== id) {
-        throw new UnauthorizedException('You can just update your own profile');
+        throw new ForbiddenException('You can just update your own profile');
       }
       return this.prisma.user.update({
         where: {
@@ -165,7 +171,7 @@ export class StudentService {
     });
     if (currentUser.role === Role.STUDENT) {
       if (currentUser.id !== id) {
-        throw new UnauthorizedException('You can just update your profile');
+        throw new ConflictException('You can just update your profile');
       }
       if (
         !existUser ||
@@ -213,7 +219,7 @@ export class StudentService {
       where: { id: id },
     });
     if (!existUser) {
-      throw new UnauthorizedException('User not found');
+      throw new NotFoundException('User not found');
     }
     return await this.prisma.user.delete({
       where: { id: id },

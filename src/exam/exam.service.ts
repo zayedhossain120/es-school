@@ -1,7 +1,7 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamDto } from './dto/exam.dto';
@@ -45,7 +45,7 @@ export class ExamService {
     });
 
     if (!isEnrolled) {
-      throw new UnauthorizedException('You are not enrolled in this course.');
+      throw new ConflictException('You are not enrolled in this course.');
     }
 
     // 2. Get exams for the course
@@ -56,7 +56,7 @@ export class ExamService {
     });
 
     if (courseExams.length === 0) {
-      throw new UnauthorizedException('This course has no exams.');
+      throw new NotFoundException('This course has no exams.');
     }
 
     return courseExams;

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEnrollDto } from './dto/enroll.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
@@ -20,7 +24,7 @@ export class EnrollService {
       },
     });
     if (!existCourse) {
-      throw new UnauthorizedException('Course not found');
+      throw new NotFoundException('Course not found');
     }
 
     // check if alreday enrolled

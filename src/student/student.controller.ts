@@ -43,6 +43,14 @@ export class StudentController {
     return this.studentService.signin(dto);
   }
 
+  // get me
+  @Roles(Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('me')
+  getProfile(@Req() req: Request) {
+    return req.user;
+  }
+
   //update student
   @Roles(Role.TEACHER, Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)

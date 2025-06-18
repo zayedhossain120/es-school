@@ -69,19 +69,24 @@ export class StudentService {
       defaultLimit: 10,
     });
 
-    return this.prisma.user.findMany({
-      where: { ...q.where, role: Role.STUDENT },
-      orderBy: q.orderBy,
-      skip: q.skip,
-      take: q.take,
-      select: {
-        id: true,
-        full_name: true,
-        email: true,
-        role: true,
-        is_active: true,
-      },
-    });
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where: q.where,
+        orderBy: q.orderBy,
+        skip: q.skip,
+        take: q.take,
+        select: {
+          id: true,
+          full_name: true,
+          email: true,
+          role: true,
+          is_active: true,
+        },
+      }),
+      this.prisma.user.count({ where: q.where }),
+    ]);
+
+    return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
   }
 
   //get student

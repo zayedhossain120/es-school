@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamDto } from './dto/exam.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
@@ -16,7 +20,7 @@ export class ExamService {
       },
     });
     if (!existCourse) {
-      throw new UnauthorizedException('Course not found');
+      throw new NotFoundException('Course not found');
     }
     return this.prisma.exam.create({
       data: {

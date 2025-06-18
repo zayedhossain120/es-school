@@ -43,6 +43,14 @@ export class AuthController {
     return this.authService.signin(dto);
   }
 
+  // get me
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Get('me')
+  getProfile(@Req() req: Request) {
+    return req.user;
+  }
+
   //updata
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -57,14 +65,6 @@ export class AuthController {
   @Get('all')
   getAll() {
     return this.authService.getAllUsers();
-  }
-
-  // get me
-  @Roles(Role.TEACHER)
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Get('me')
-  getProfile(@Req() req: Request) {
-    return req.user;
   }
 
   @Roles(Role.TEACHER)

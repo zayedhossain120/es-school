@@ -1,23 +1,11 @@
 import { Module } from '@nestjs/common';
 import { EnrollService } from './enroll.service';
 import { EnrollController } from './enroll.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { JwtConfigModule } from 'src/common/modules/jwt-config.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: '24h',
-        },
-      }),
-    }),
-  ],
+  imports: [ConfigModule, JwtConfigModule],
   providers: [EnrollService],
   controllers: [EnrollController],
 })

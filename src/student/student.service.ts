@@ -99,7 +99,7 @@ export class StudentService {
         _count: true,
         created_at: true,
         enrollments: true,
-        techer_courses: true,
+        teacher_courses: true,
         results: true,
         is_active: true,
       },

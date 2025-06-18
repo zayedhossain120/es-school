@@ -23,9 +23,10 @@ model User {
   expert_in String?
   is_active Boolean
   // relation
-  techer_courses   Course[] @relation("TeacherCourses")
+  teacher_courses   Course[]
   enrollments Enroll[]
   results Result[]
+  exams Exam[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -37,10 +38,10 @@ model Course {
   module     String
   teacher_id String
   //relation 
-  teacher    User     @relation("TeacherCourses", fields: [teacher_id], references: [id])
+  teacher    User     @relation(fields: [teacher_id], references: [id])
   results    Result[]
-  exam Exam[]
-  enroll Enroll[]
+  exams Exam[]
+  enrollments Enroll[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -65,9 +66,11 @@ model Exam {
   description String
   exam_date   DateTime @default(now())
   course_id    String
+  student_id String
   // relation
+  student User @relation(fields: [student_id] , references: [ id])
   course Course @relation(fields: [course_id] , references: [id])
-  Result     Result[]       
+  results     Result[]       
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -85,7 +88,7 @@ model Result {
   // relation
   exam       Exam?    @relation(fields: [exam_id], references: [id])
   student    User?    @relation(fields: [student_id], references: [id])
-  Course     Course?  @relation(fields: [course_id], references: [id])
+  course     Course?  @relation(fields: [course_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

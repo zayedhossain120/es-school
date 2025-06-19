@@ -66,7 +66,6 @@ model Exam {
   id          String   @id @default(uuid())
   title       String
   description String
-  exam_date   DateTime @default(now())
   course_id    String
   // relation
   courses Course @relation(fields: [course_id] , references: [id])

@@ -6,7 +6,6 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamDto } from './dto/exam.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
-import { CreateResultDto } from 'src/result/dto/result.dto';
 
 @Injectable()
 export class ExamService {
@@ -60,25 +59,5 @@ export class ExamService {
     }
 
     return courseExams;
-  }
-
-  // exam participant for student
-  async participant(dto: CreateResultDto) {
-    const existingResult = await this.prisma.result.findFirst({
-      where: {
-        student_id: dto.student_id,
-        exam_id: dto.exam_id,
-      },
-    });
-
-    if (existingResult) {
-      throw new Error('You have already participated in this exam.');
-    }
-
-    return this.prisma.result.create({
-      data: {
-        ...dto,
-      },
-    });
   }
 }

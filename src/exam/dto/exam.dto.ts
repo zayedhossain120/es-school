@@ -12,8 +12,4 @@ export class CreateExamDto {
   @IsNotEmpty()
   @IsUUID()
   course_id: string;
-
-  @IsNotEmpty()
-  @IsUUID()
-  student_id: string;
 }

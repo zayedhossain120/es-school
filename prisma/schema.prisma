@@ -27,7 +27,7 @@ model User {
   teacher_courses   Course[]
   enrollments Enroll[]
   results Result[]
-  exams Exam[]
+  examParticipant ExamParticipant[] 
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -43,13 +43,14 @@ model Course {
   results    Result[]
   exams Exam[]
   enrollments Enroll[]
+  examParticipant ExamParticipant[] 
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model Enroll {
-  id          String   @id @default(ulid())
+  id          String   @id @default(uuid())
   student_id     String
   course_id   String
   enrolled_at DateTime @default(now())
@@ -67,29 +68,48 @@ model Exam {
   description String
   exam_date   DateTime @default(now())
   course_id    String
-  student_id String
   // relation
-  students User @relation(fields: [student_id] , references: [ id])
   courses Course @relation(fields: [course_id] , references: [id])
-  results     Result[]       
+  results     Result[]  
+  examParticipant ExamParticipant[]     
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 
-model Result {
+model ExamParticipant {
   id         String  @id @default(uuid())
-  marks      Int?
-  status     Status @default(PENDING)
   exam_id    String
   student_id String
   answer  String
   course_id   String
+
   // relation
   exams      Exam?    @relation(fields: [exam_id], references: [id])
   students    User?    @relation(fields: [student_id], references: [id])
   courses     Course?  @relation(fields: [course_id], references: [id])
+  results Result[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+
+model Result {
+  id         String  @id @default(uuid())
+  marks      Int
+  status     Status @default(PENDING)
+  exam_id    String
+  student_id String
+  course_id   String
+  participant_id String
+  // relation
+  exams      Exam?    @relation(fields: [exam_id], references: [id])
+  students    User?    @relation(fields: [student_id], references: [id])
+  courses     Course?  @relation(fields: [course_id], references: [id])
+  ExamParticipant ExamParticipant? @relation(fields: [participant_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

@@ -86,10 +86,10 @@ model ExamParticipant {
   course_id   String
 
   // relation
-  exams      Exam?    @relation(fields: [exam_id], references: [id])
-  students    User?    @relation(fields: [student_id], references: [id])
-  courses     Course?  @relation(fields: [course_id], references: [id])
-  results Result[]
+  exams      Exam    @relation(fields: [exam_id], references: [id])
+  students    User    @relation(fields: [student_id], references: [id])
+  courses     Course  @relation(fields: [course_id], references: [id])
+  result Result?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -99,17 +99,17 @@ model ExamParticipant {
 
 model Result {
   id         String  @id @default(uuid())
-  marks      Int
+  marks      Int?
   status     Status @default(PENDING)
   exam_id    String
   student_id String
   course_id   String
-  participant_id String
+  participant_id String @unique
   // relation
-  exams      Exam?    @relation(fields: [exam_id], references: [id])
-  students    User?    @relation(fields: [student_id], references: [id])
-  courses     Course?  @relation(fields: [course_id], references: [id])
-  ExamParticipant ExamParticipant? @relation(fields: [participant_id], references: [id])
+  exams      Exam    @relation(fields: [exam_id], references: [id])
+  students    User    @relation(fields: [student_id], references: [id])
+  courses     Course  @relation(fields: [course_id], references: [id])
+  participant     ExamParticipant? @relation(fields: [participant_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

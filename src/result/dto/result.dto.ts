@@ -1,11 +1,4 @@
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  IsInt,
-  IsEnum,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID, IsInt, IsEnum } from 'class-validator';
 
 export enum Status {
   PASSED = 'PASSED',
@@ -25,10 +18,6 @@ export class CreateResultDto {
   @IsUUID()
   @IsNotEmpty()
   course_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  answer: string;
 
   @IsOptional()
   @IsInt()

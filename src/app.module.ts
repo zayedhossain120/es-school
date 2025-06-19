@@ -9,6 +9,7 @@ import { CourseModule } from './course/course.module';
 import { EnrollModule } from './enroll/enroll.module';
 import { ExamModule } from './exam/exam.module';
 import { ResultModule } from './result/result.module';
+import { ParticipantModule } from './participant/participant.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ResultModule } from './result/result.module';
     EnrollModule,
     ExamModule,
     ResultModule,
+    ParticipantModule,
   ],
   controllers: [AppController],
   providers: [AppService],

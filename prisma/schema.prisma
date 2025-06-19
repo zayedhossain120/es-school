@@ -14,6 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -38,7 +39,7 @@ model Course {
   module     String
   teacher_id String
   //relation 
-  teacher    User     @relation(fields: [teacher_id], references: [id])
+  teachers    User     @relation(fields: [teacher_id], references: [id])
   results    Result[]
   exams Exam[]
   enrollments Enroll[]
@@ -53,8 +54,8 @@ model Enroll {
   course_id   String
   enrolled_at DateTime @default(now())
 // relation 
-  student User @relation(fields: [student_id] ,references: [id])
-  course Course @relation(fields: [course_id] , references: [id])
+  students User @relation(fields: [student_id] ,references: [id])
+  courses Course @relation(fields: [course_id] , references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -68,8 +69,8 @@ model Exam {
   course_id    String
   student_id String
   // relation
-  student User @relation(fields: [student_id] , references: [ id])
-  course Course @relation(fields: [course_id] , references: [id])
+  students User @relation(fields: [student_id] , references: [ id])
+  courses Course @relation(fields: [course_id] , references: [id])
   results     Result[]       
 
   created_at DateTime @default(now())
@@ -86,9 +87,9 @@ model Result {
   answer  String
   course_id   String
   // relation
-  exam       Exam?    @relation(fields: [exam_id], references: [id])
-  student    User?    @relation(fields: [student_id], references: [id])
-  course     Course?  @relation(fields: [course_id], references: [id])
+  exams      Exam?    @relation(fields: [exam_id], references: [id])
+  students    User?    @relation(fields: [student_id], references: [id])
+  courses     Course?  @relation(fields: [course_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

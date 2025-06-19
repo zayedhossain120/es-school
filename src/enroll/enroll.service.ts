@@ -73,7 +73,7 @@ export class EnrollService {
         student_id: true,
         course_id: true,
         created_at: true,
-        course: true,
+        courses: true,
       },
     });
   }

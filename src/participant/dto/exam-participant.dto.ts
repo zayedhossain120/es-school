@@ -21,6 +21,9 @@ export class CreateExamParticipantDto {
 /* -------------------------------------------------- */
 /*  UPDATE                                            */
 /* -------------------------------------------------- */
-// export class UpdateExamParticipantDto extends PartialType(
-//   CreateExamParticipantDto,
-// ) {}
+export class UpdateExammParticipantDto {
+  @IsString()
+  @IsOptional()
+  @Length(0, 10_000)
+  answer: string;
+}

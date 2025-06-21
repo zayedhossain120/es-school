@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -45,11 +46,21 @@ export class EnrollController {
   getAll() {
     return this.enrollService.getAll();
   }
-  // get all enroll by teache
-  @Roles(Role.TEACHER)
+
+  // get a enroll
+  @Roles(Role.TEACHER, Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.enrollService.getById(id);
+  }
+
+  // delete enrollment
+  @Roles(Role.TEACHER, Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Delete(':id')
+  delete(@Param('id') id: string, @Req() req: Request) {
+    const currentUser = req.user as UserPayload;
+    return this.enrollService.delete(id, currentUser);
   }
 }

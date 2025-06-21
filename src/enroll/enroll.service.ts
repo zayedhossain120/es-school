@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -6,6 +7,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEnrollDto } from './dto/enroll.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { Role } from 'generated/prisma';
 
 @Injectable()
 export class EnrollService {
@@ -54,6 +56,22 @@ export class EnrollService {
     return this.prisma.enroll.findMany();
   }
 
+  // get my enroll for student
+  async getMyEnroll(currentUser: UserPayload) {
+    return this.prisma.enroll.findMany({
+      where: {
+        student_id: currentUser.id,
+      },
+      select: {
+        id: true,
+        student_id: true,
+        course_id: true,
+        created_at: true,
+        courses: true,
+      },
+    });
+  }
+
   // get a single enroll by id (Teacher only)
   async getById(id: string) {
     return this.prisma.enroll.findUnique({
@@ -63,18 +81,23 @@ export class EnrollService {
     });
   }
 
-  // get my enroll for student
-  async getMyEnroll(currentUser: UserPayload) {
-    return this.prisma.enroll.findMany({
-      where: {
-        student_id: currentUser.id,
-      },
-      select: {
-        student_id: true,
-        course_id: true,
-        created_at: true,
-        courses: true,
-      },
-    });
+  // delete a enrollment
+
+  async delete(id: string, currentUser: UserPayload) {
+    // check availability
+    const enrollment = await this.prisma.enroll.findUnique({ where: { id } });
+
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found');
+    }
+
+    if (
+      currentUser.role === Role.STUDENT &&
+      enrollment.student_id !== currentUser.id
+    ) {
+      throw new ForbiddenException('You cannot delete this enrollment');
+    }
+
+    return this.prisma.enroll.delete({ where: { id } });
   }
 }

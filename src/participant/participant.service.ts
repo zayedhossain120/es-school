@@ -60,6 +60,11 @@ export class ParticipantService {
       where: {
         student_id: currentUserId,
       },
+      select: {
+        id: true,
+        answer: true,
+        result: true,
+      },
     });
   }
 

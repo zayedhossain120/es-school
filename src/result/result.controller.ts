@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -63,5 +64,13 @@ export class ResultController {
     @Param('id') resultId: string,
   ) {
     return this.resultService.updateResultById(dto, resultId);
+  }
+
+  // delete a result for teacher
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.resultService.delete(id);
   }
 }

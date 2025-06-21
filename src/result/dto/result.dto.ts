@@ -23,13 +23,11 @@ export class CreateResultDto {
   @IsNotEmpty()
   participant_id: string;
 
-  @IsOptional()
   @IsInt()
-  marks?: number;
+  marks: number;
 
-  @IsOptional()
   @IsEnum(Status)
-  status?: Status;
+  status: Status;
 }
 
 export class UpdateResultDto {

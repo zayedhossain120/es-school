@@ -10,7 +10,7 @@ export class ResultService {
   async create(dto: CreateResultDto) {
     const isParticipant = await this.prisma.examParticipant.findUnique({
       where: {
-        id: dto.exam_id,
+        id: dto.participant_id,
       },
     });
 
@@ -35,6 +35,13 @@ export class ResultService {
     });
   }
 
+  // my result for studnt
+  async myResult(currentUser: UserPayload) {
+    return this.prisma.result.findMany({
+      where: { student_id: currentUser.id },
+    });
+  }
+
   // update a result by teacher
   async updateResultById(dto: UpdateResultDto, resultId: string) {
     return this.prisma.result.update({
@@ -47,10 +54,20 @@ export class ResultService {
     });
   }
 
-  // my result for studnt
-  async myResult(currentUser: UserPayload) {
-    return this.prisma.result.findMany({
-      where: { student_id: currentUser.id },
+  // delete result for teacher
+
+  async delete(id: string) {
+    const isResult = await this.prisma.result.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!isResult) {
+      throw new NotFoundException('Result not found');
+    }
+    return this.prisma.result.delete({
+      where: { id: id },
     });
   }
 }

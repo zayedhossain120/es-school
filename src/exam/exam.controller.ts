@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -12,7 +13,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/auth/guards/role.guard';
-import { CreateExamDto } from './dto/exam.dto';
+import { CreateExamDto, UpdateExamDto } from './dto/exam.dto';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
 
@@ -27,6 +28,13 @@ export class ExamController {
   create(@Body() dto: CreateExamDto) {
     return this.examService.create(dto);
   }
+  // update exam
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Patch(':id')
+  update(@Body() dto: UpdateExamDto, @Param('id') id: string) {
+    return this.examService.update(dto, id);
+  }
 
   // get all exam
   @Roles(Role.TEACHER)
@@ -37,11 +45,11 @@ export class ExamController {
   }
 
   // exam by course id for student
-  @Roles(Role.STUDENT)
+  @Roles(Role.STUDENT, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get(':id')
-  getMyExam(@Req() req: Request, @Param('id') courseId: string) {
+  getExamById(@Req() req: Request, @Param('id') courseId: string) {
     const currentUser = req.user as UserPayload;
-    return this.examService.getMyExam(currentUser, courseId);
+    return this.examService.getExamById(currentUser, courseId);
   }
 }

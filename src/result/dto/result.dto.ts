@@ -19,6 +19,10 @@ export class CreateResultDto {
   @IsNotEmpty()
   course_id: string;
 
+  @IsUUID()
+  @IsNotEmpty()
+  participant_id: string;
+
   @IsOptional()
   @IsInt()
   marks?: number;

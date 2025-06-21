@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,13 +13,21 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/auth/guards/role.guard';
-import { UpdateResultDto } from './dto/result.dto';
+import { CreateResultDto, UpdateResultDto } from './dto/result.dto';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
 
 @Controller('result')
 export class ResultController {
   constructor(private resultService: ResultService) {}
+
+  // create result
+  @Roles(Role.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Post('create')
+  create(@Body() dto: CreateResultDto) {
+    return this.resultService.create(dto);
+  }
 
   // get all result
   @Roles(Role.TEACHER)

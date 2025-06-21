@@ -1,11 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateResultDto } from './dto/result.dto';
+import { CreateResultDto, UpdateResultDto } from './dto/result.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
 
 @Injectable()
 export class ResultService {
   constructor(private prisma: PrismaService) {}
+  // create a result
+  async create(dto: CreateResultDto) {
+    const isParticipant = await this.prisma.examParticipant.findUnique({
+      where: {
+        id: dto.exam_id,
+      },
+    });
+
+    if (!isParticipant) {
+      throw new NotFoundException('Participant not found');
+    }
+
+    return this.prisma.result.create({ data: { ...dto } });
+  }
+
   // get all result for teacher
   async getAll() {
     return this.prisma.result.findMany();

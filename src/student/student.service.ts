@@ -18,12 +18,14 @@ import * as bcrypt from 'bcrypt';
 import { UserPayload } from 'src/interface/user-payload.interface';
 import { QueryEngine } from 'src/common/services/query.service';
 import { GetStudentsQueryDto } from './dto/student-query.dto';
+import { CloudflareService } from 'src/cloudflare/cloudflare.service';
 
 @Injectable()
 export class StudentService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly cloudflare: CloudflareService,
     private qe: QueryEngine,
   ) {}
 
@@ -97,7 +99,7 @@ export class StudentService {
 
   //get student
   async getStudent(id: string) {
-    return this.prisma.user.findMany({
+    return this.prisma.user.findUnique({
       where: {
         id: id,
       },
@@ -115,49 +117,41 @@ export class StudentService {
     });
   }
 
-  // update student
+  //update student
   async update(id: string, dto: UpdateUserDto, currentUser: UserPayload) {
-    const existUser = await this.prisma.user.findUnique({
-      where: { id: id },
-    });
-    if (!existUser) {
-      throw new NotFoundException('User not found');
-    }
-    // role-base access togic
-    if (currentUser.role === Role.STUDENT) {
-      if (currentUser.id !== id) {
-        throw new ForbiddenException('You can just update your own profile');
-      }
-      return this.prisma.user.update({
-        where: {
-          id: id,
-        },
-        data: {
-          full_name: dto.full_name,
-        },
-        select: {
-          full_name: true,
-          email: true,
-          id: true,
-        },
-      });
+    /* ----------  Make sure the target user exists ---------------- */
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    /* ----------  Role-based access guard ------------------------- */
+    if (currentUser.role === Role.STUDENT && currentUser.id !== id) {
+      throw new ForbiddenException('You may update only your own profile.');
     }
 
-    if (currentUser.role === Role.TEACHER) {
-      return this.prisma.user.update({
-        where: {
-          id: id,
-        },
-        data: {
-          full_name: dto.full_name,
-        },
-        select: {
-          full_name: true,
-          email: true,
-          id: true,
-        },
-      });
+    /* ----------  Build update data ------------------------------- */
+    const data: Prisma.UserUpdateInput = {};
+    if (dto.full_name) data.full_name = dto.full_name;
+
+    /* ----------  Optional presigned upload URL ------------------- */
+    let uploadUrl: string | undefined;
+    if (dto.profile_photo) {
+      const { uploadUrl: url, fileName } = await this.cloudflare.getUploadUrl(
+        `users/${dto.profile_photo}`,
+      );
+      uploadUrl = url;
+      data.profile_photo = fileName;
     }
+
+    console.log(data);
+    /* ----------  Execute update ---------------------------------- */
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data,
+      select: { id: true, full_name: true, email: true, profile_photo: true },
+    });
+
+    /* ----------  Return consistent response ---------------------- */
+    return uploadUrl ? { ...updated, upload_url: uploadUrl } : updated;
   }
 
   // update password

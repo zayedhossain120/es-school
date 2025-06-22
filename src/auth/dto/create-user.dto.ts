@@ -54,6 +54,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   is_active?: boolean;
+
+  @IsOptional()
+  @IsString()
+  profile_photo?: string;
 }
 
 export class UpdatePasswordDto {

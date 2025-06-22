@@ -14,7 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -23,6 +22,7 @@ model User {
   role      Role     @default(STUDENT)
   expert_in String?
   is_active Boolean
+  profile_photo String?
   // relation
   teacher_courses   Course[]
   enrollments Enroll[]
@@ -38,6 +38,8 @@ model Course {
   title      String
   module     String
   teacher_id String
+  course_thumbnail String?
+
   //relation 
   teachers    User     @relation(fields: [teacher_id], references: [id])
   results    Result[]

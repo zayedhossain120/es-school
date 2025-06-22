@@ -10,6 +10,7 @@ import { EnrollModule } from './enroll/enroll.module';
 import { ExamModule } from './exam/exam.module';
 import { ResultModule } from './result/result.module';
 import { ParticipantModule } from './participant/participant.module';
+import { CloudflareModule } from './cloudflare/cloudflare.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ParticipantModule } from './participant/participant.module';
     ExamModule,
     ResultModule,
     ParticipantModule,
+    CloudflareModule,
   ],
   controllers: [AppController],
   providers: [AppService],

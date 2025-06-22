@@ -1,7 +1,0 @@
-NEXT_PUBLIC_server_url="https://new-api.rrotamall.com"
-NEXT_PUBLIC_service_url="https://pro.bdcourier.com"
-NEXT_PUBLIC_client_url="https://new.rrotamall.com"
-NEXT_PUBLIC_dashboard_url="https://new-panel.rrotamall.com"
-# server token
-NEXT_PUBLIC_API_KEY=bf5YldcxEINqYgvXxEK0oT0ZfkFVHNYt0V7nL5laoJvShUAW9CHrQWkge2KE
-access_token_secret=fa7600a4ab2d4da5ad98110d6dfa7600a4ab2d4da5ad98110d6d

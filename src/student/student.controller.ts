@@ -24,10 +24,14 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
 import { GetStudentsQueryDto } from './dto/student-query.dto';
+import { CloudflareService } from 'src/cloudflare/cloudflare.service';
 
 @Controller('student')
 export class StudentController {
-  constructor(private studentService: StudentService) {}
+  constructor(
+    private studentService: StudentService,
+    private readonly cloudflare: CloudflareService,
+  ) {}
 
   // create student
   @Roles(Role.TEACHER)
@@ -49,6 +53,11 @@ export class StudentController {
   @Get('me')
   getProfile(@Req() req: Request) {
     return req.user;
+  }
+
+  @Get('upload-url')
+  async getUploadUrl(@Query('fileName') fileName: string) {
+    return this.cloudflare.getUploadUrl(`users/${fileName}`);
   }
 
   //update student

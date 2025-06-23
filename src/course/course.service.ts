@@ -111,20 +111,21 @@ export class CourseService {
 
   // get a course by id
   async getCourseById(id: string) {
-    return this.prisma.course.findUnique({
+    const course = await this.prisma.course.findUnique({
       where: {
         id: id,
       },
-      select: {
-        id: true,
-        title: true,
-        module: true,
-        teacher_id: true,
-        created_at: true,
-        updated_at: true,
-        _count: true,
-      },
     });
+
+    let coursetTumbnail: string | null = null;
+
+    if (course?.course_thumbnail) {
+      coursetTumbnail = await this.cloudflare.getDownloadUrl(
+        course?.course_thumbnail,
+      );
+    }
+
+    return { ...course, coursetTumbnail };
   }
 
   // delete course

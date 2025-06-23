@@ -69,7 +69,6 @@ export class StudentService {
   async getMyProfile(currentUserId: string) {
     const currentUser = await this.prisma.user.findUnique({
       where: { id: currentUserId },
-      // select: { id: true, full_name: true, profile_photo: true },
       omit: {
         password: true,
       },
@@ -84,7 +83,7 @@ export class StudentService {
       );
     }
 
-    return { ...currentUser, avatarUrl: profile_photo_url };
+    return { ...currentUser, profile_photo_url: profile_photo_url };
   }
 
   // get all student
@@ -163,11 +162,12 @@ export class StudentService {
       uploadUrl = url;
       data.profile_photo = fileName;
     }
+
     /* ----------  Execute update ---------------------------------- */
     const updated = await this.prisma.user.update({
       where: { id },
       data,
-      select: { id: true, full_name: true, email: true, profile_photo: true },
+      omit: { password: true },
     });
 
     /* ----------  Return consistent response ---------------------- */

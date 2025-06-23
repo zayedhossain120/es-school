@@ -56,11 +56,6 @@ export class StudentController {
     return this.studentService.getMyProfile(currentUserId);
   }
 
-  // @Get('upload-url')
-  // async getUploadUrl(@Query('fileName') fileName: string) {
-  //   return this.cloudflare.getUploadUrl(`users/${fileName}`);
-  // }
-
   //update student
   @Roles(Role.TEACHER, Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)

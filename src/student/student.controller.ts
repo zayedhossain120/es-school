@@ -51,8 +51,9 @@ export class StudentController {
   @Roles(Role.STUDENT)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get('me')
-  getProfile(@Req() req: Request) {
-    return req.user;
+  getMyProfile(@Req() req: Request) {
+    const currentUserId = req.user?.id as string;
+    return this.studentService.getMyProfile(currentUserId);
   }
 
   // @Get('upload-url')

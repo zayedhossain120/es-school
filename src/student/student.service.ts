@@ -65,6 +65,28 @@ export class StudentService {
     return this.generateToken(existUser);
   }
 
+  // get me
+  async getMyProfile(currentUserId: string) {
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: currentUserId },
+      // select: { id: true, full_name: true, profile_photo: true },
+      omit: {
+        password: true,
+      },
+    });
+    if (!currentUser) throw new NotFoundException('User not found');
+
+    let profile_photo_url: string | null = null;
+
+    if (currentUser.profile_photo) {
+      profile_photo_url = await this.cloudflare.getDownloadUrl(
+        currentUser.profile_photo,
+      );
+    }
+
+    return { ...currentUser, avatarUrl: profile_photo_url };
+  }
+
   // get all student
   async getAllStudent(raw: GetStudentsQueryDto) {
     const q = this.qe.build<

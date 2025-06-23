@@ -5,12 +5,14 @@ import { UserPayload } from 'src/interface/user-payload.interface';
 import { Prisma, Role } from 'generated/prisma';
 import { QueryEngine } from 'src/common/services/query.service';
 import { GetCoursesQueryDto } from './dto/courses-query.dto';
+import { CloudflareService } from 'src/cloudflare/cloudflare.service';
 
 @Injectable()
 export class CourseService {
   constructor(
     private prisma: PrismaService,
     private qe: QueryEngine,
+    private readonly cloudflare: CloudflareService,
   ) {}
   // create course
   async createCourse(dto: CreateCourseDto, currentUser: UserPayload) {

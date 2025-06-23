@@ -163,8 +163,6 @@ export class StudentService {
       uploadUrl = url;
       data.profile_photo = fileName;
     }
-
-    console.log(data);
     /* ----------  Execute update ---------------------------------- */
     const updated = await this.prisma.user.update({
       where: { id },

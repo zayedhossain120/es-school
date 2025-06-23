@@ -20,12 +20,39 @@ export class CourseService {
       throw new UnauthorizedException('Only teachers can create courses');
     }
 
-    return this.prisma.course.create({
-      data: {
-        ...dto,
-        teacher_id: currentUser.id!,
+    /* ---------- optional thumbnail presign ------------------------ */
+    let uploadUrl: string | undefined;
+    let thumbnail: string | undefined;
+
+    if (dto.course_thumbnail) {
+      const { uploadUrl: url, fileName } = await this.cloudflare.getUploadUrl(
+        `courses/${dto.course_thumbnail}`,
+      );
+      uploadUrl = url;
+      thumbnail = fileName; // store only the key
+    }
+
+    /* ---------- build data object --------------------------------- */
+    const data: Prisma.CourseCreateInput = {
+      title: dto.title,
+      module: dto.module,
+      teachers: { connect: { id: currentUser.id } },
+      ...(thumbnail && { course_thumbnail: thumbnail }),
+    };
+
+    /* ---------- write to DB --------------------------------------- */
+    const created = await this.prisma.course.create({
+      data,
+      select: {
+        id: true,
+        title: true,
+        module: true,
+        course_thumbnail: true,
       },
     });
+
+    /* ---------- return consistent response ------------------------ */
+    return uploadUrl ? { ...created, upload_url: uploadUrl } : created;
   }
 
   // get all course

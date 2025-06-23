@@ -6,6 +6,10 @@ export class CreateCourseDto {
 
   @IsString()
   module: string;
+
+  @IsOptional()
+  @IsString()
+  course_thumbnail?: string;
 }
 
 export class UpdateCourseDto {

@@ -47,8 +47,9 @@ export class AuthController {
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get('me')
-  getProfile(@Req() req: Request) {
-    return req.user;
+  getMyProfile(@Req() req: Request) {
+    const currentUserId = req.user?.id as string;
+    return this.authService.getMyProfile(currentUserId);
   }
 
   //updata

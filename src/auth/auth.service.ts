@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -7,13 +11,15 @@ import {
   UpdateUserDto,
 } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { User } from 'generated/prisma';
+import { Prisma, User } from 'generated/prisma';
+import { CloudflareService } from 'src/cloudflare/cloudflare.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly cloudflare: CloudflareService,
   ) {}
   //signup
   async signUp(dto: CreateUserDto) {
@@ -56,6 +62,27 @@ export class AuthService {
     return this.generateToken(existUser);
   }
 
+  // get me
+  async getMyProfile(currentUserId: string) {
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: currentUserId },
+      omit: {
+        password: true,
+      },
+    });
+    if (!currentUser) throw new NotFoundException('User not found');
+
+    let profile_photo_url: string | null = null;
+
+    if (currentUser.profile_photo) {
+      profile_photo_url = await this.cloudflare.getDownloadUrl(
+        currentUser.profile_photo,
+      );
+    }
+
+    return { ...currentUser, profile_photo_url: profile_photo_url };
+  }
+
   // get all
   async getAllUsers() {
     return this.prisma.user.findMany({
@@ -79,19 +106,27 @@ export class AuthService {
     if (!existUser) {
       throw new UnauthorizedException('User not found');
     }
-    return this.prisma.user.update({
-      where: { id: id },
-      data: {
-        full_name: dto.full_name,
-        expert_in: dto.expert_in,
-      },
-      select: {
-        full_name: true,
-        email: true,
-        expert_in: true,
-        role: true,
-      },
+    const data: Prisma.UserUpdateInput = {};
+    if (dto.full_name) data.full_name = dto.full_name;
+
+    /* ----------  Optional presigned upload URL ------------------- */
+    let uploadUrl: string | undefined;
+    if (dto.profile_photo) {
+      const { uploadUrl: url, fileName } = await this.cloudflare.getUploadUrl(
+        `users/${dto.profile_photo}`,
+      );
+      uploadUrl = url;
+      data.profile_photo = fileName;
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data,
+      omit: { password: true },
     });
+
+    /* ----------  Return consistent response ---------------------- */
+    return uploadUrl ? { ...updated, upload_url: uploadUrl } : updated;
   }
 
   //delete

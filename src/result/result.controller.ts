@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { RoleGuard } from 'src/auth/guards/role.guard';
 import { CreateResultDto, UpdateResultDto } from './dto/result.dto';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { ResultQueryDto } from './dto/result-query.dto';
 
 @Controller('result')
 export class ResultController {
@@ -34,8 +36,8 @@ export class ResultController {
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get('all')
-  getAll() {
-    return this.resultService.getAll();
+  getAll(@Query() raw: ResultQueryDto) {
+    return this.resultService.getAll(raw);
   }
 
   // update result by id

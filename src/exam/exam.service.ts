@@ -6,10 +6,16 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamDto, UpdateExamDto } from './dto/exam.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { ExamQueryDto } from './dto/exam-query.dto';
+import { QueryEngine } from 'src/common/services/query.service';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class ExamService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private qe: QueryEngine,
+  ) {}
   // create exam
   async create(dto: CreateExamDto) {
     // check course availability
@@ -44,8 +50,41 @@ export class ExamService {
   }
 
   //get all exam for teacher
-  async getAll() {
-    return this.prisma.exam.findMany();
+  async getAll(raw: ExamQueryDto) {
+    const q = this.qe.build<
+      Prisma.ExamWhereInput,
+      Prisma.ExamOrderByWithRelationInput
+    >(raw, {
+      searchable: ['title', 'description'],
+      filterable: ['title', 'description', 'course_id'],
+      defaultSort: 'created_at',
+      defaultLimit: 10,
+    });
+
+    try {
+      const [data, total] = await this.prisma.$transaction([
+        this.prisma.exam.findMany({
+          where: q.where,
+          orderBy: q.orderBy,
+          skip: q.skip,
+          take: q.take,
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            course_id: true,
+          },
+        }),
+        this.prisma.exam.count({ where: q.where }),
+      ]);
+
+      console.log(data);
+
+      return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
+    } catch (err) {
+      console.error('Exam error ➜', err);
+      throw err;
+    }
   }
 
   // get exam by id

@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateResultDto, UpdateResultDto } from './dto/result.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
 import { QueryEngine } from 'src/common/services/query.service';
+import { ResultQueryDto } from './dto/result-query.dto';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class ResultService {
@@ -26,8 +28,33 @@ export class ResultService {
   }
 
   // get all result for teacher
-  async getAll() {
-    return this.prisma.result.findMany();
+  async getAll(raw: ResultQueryDto) {
+    const q = this.qe.build<
+      Prisma.ResultWhereInput,
+      Prisma.ResultOrderByWithRelationInput
+    >(raw, {
+      searchable: ['status'],
+      filterable: ['status'],
+      defaultSort: 'created_at',
+      defaultLimit: 10,
+    });
+
+    try {
+      const [data, total] = await this.prisma.$transaction([
+        this.prisma.result.findMany({
+          where: q.where,
+          orderBy: q.orderBy,
+          skip: q.skip,
+          take: q.take,
+        }),
+        this.prisma.result.count({ where: q.where }),
+      ]);
+
+      return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
+    } catch (err) {
+      console.error('resut service  ➜', err);
+      throw err;
+    }
   }
 
   // get a result by id for teacher

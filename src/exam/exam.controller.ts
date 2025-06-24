@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { RoleGuard } from 'src/auth/guards/role.guard';
 import { CreateExamDto, UpdateExamDto } from './dto/exam.dto';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { ExamQueryDto } from './dto/exam-query.dto';
 
 @Controller('exam')
 export class ExamController {
@@ -40,8 +42,8 @@ export class ExamController {
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get('all')
-  getAll() {
-    return this.examService.getAll();
+  getAll(@Query() raw: ExamQueryDto) {
+    return this.examService.getAll(raw);
   }
 
   // exam by course id for student

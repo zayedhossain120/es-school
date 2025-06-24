@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateResultDto, UpdateResultDto } from './dto/result.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { QueryEngine } from 'src/common/services/query.service';
 
 @Injectable()
 export class ResultService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private qe: QueryEngine,
+  ) {}
   // create a result
   async create(dto: CreateResultDto) {
     const isParticipant = await this.prisma.examParticipant.findUnique({

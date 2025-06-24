@@ -93,7 +93,7 @@ export class AuthService {
       Prisma.UserOrderByWithRelationInput
     >(raw, {
       searchable: ['full_name', 'email'],
-      filterable: ['full_name', 'email', 'role', 'is_active'],
+      filterable: ['full_name', 'email', 'is_active'],
       defaultSort: 'created_at',
       defaultLimit: 10,
     });

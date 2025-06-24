@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import {
 } from './dto/exam-participant.dto';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { ParticipantQueryDto } from './dto/participant-query.dto';
 
 @Controller('participant')
 export class ParticipantController {
@@ -61,8 +63,8 @@ export class ParticipantController {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.TEACHER)
   @Get('all')
-  getAll() {
-    return this.participantService.getAll();
+  getAll(@Query() raw: ParticipantQueryDto) {
+    return this.participantService.getAll(raw);
   }
 
   // get all participant by course id

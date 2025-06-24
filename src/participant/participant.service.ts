@@ -6,10 +6,16 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamParticipantDto } from './dto/exam-participant.dto';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { ParticipantQueryDto } from './dto/participant-query.dto';
+import { QueryEngine } from 'src/common/services/query.service';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class ParticipantService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private qe: QueryEngine,
+  ) {}
   // create participant
   async create(dto: CreateExamParticipantDto, currentUser: UserPayload) {
     // check user
@@ -69,8 +75,33 @@ export class ParticipantService {
   }
 
   // get all
-  async getAll() {
-    return this.prisma.examParticipant.findMany();
+  async getAll(raw: ParticipantQueryDto) {
+    const q = this.qe.build<
+      Prisma.ExamParticipantWhereInput,
+      Prisma.ExamParticipantOrderByWithRelationInput
+    >(raw, {
+      searchable: ['answer'],
+      filterable: ['answer'],
+      defaultSort: 'created_at',
+      defaultLimit: 10,
+    });
+
+    try {
+      const [data, total] = await this.prisma.$transaction([
+        this.prisma.examParticipant.findMany({
+          where: q.where,
+          orderBy: q.orderBy,
+          skip: q.skip,
+          take: q.take,
+        }),
+        this.prisma.examParticipant.count({ where: q.where }),
+      ]);
+
+      return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
+    } catch (err) {
+      console.error('CourseService.getAllCourse error ➜', err);
+      throw err;
+    }
   }
 
   // get all participant by course id

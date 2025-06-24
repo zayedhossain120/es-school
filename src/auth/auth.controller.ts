@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +22,7 @@ import { Role } from 'generated/prisma';
 import { RoleGuard } from './guards/role.guard';
 import { Request } from 'express';
 import { UserPayload } from 'src/interface/user-payload.interface';
+import { GetStudentsQueryDto } from 'src/student/dto/student-query.dto';
 
 declare module 'express' {
   interface Request {
@@ -64,8 +66,9 @@ export class AuthController {
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Get('all')
-  getAll() {
-    return this.authService.getAllUsers();
+  @Get('all')
+  getAll(@Query() raw: GetStudentsQueryDto) {
+    return this.authService.getAllUsers(raw);
   }
 
   @Roles(Role.TEACHER)

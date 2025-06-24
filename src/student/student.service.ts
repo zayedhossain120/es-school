@@ -100,7 +100,7 @@ export class StudentService {
 
     const [data, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
-        where: q.where,
+        where: { ...q.where, role: 'STUDENT' },
         orderBy: q.orderBy,
         skip: q.skip,
         take: q.take,

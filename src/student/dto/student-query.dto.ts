@@ -26,6 +26,5 @@ export class GetStudentsQueryDto {
   /* filterable fields */
   @IsOptional() @IsString() full_name?: string;
   @IsOptional() @IsString() email?: string;
-  @IsOptional() @IsString() role?: string; // will equal 'STUDENT'
   @IsOptional() @IsBooleanString() is_active?: string;
 }

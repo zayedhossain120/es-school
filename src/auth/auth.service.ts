@@ -13,6 +13,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Prisma, User } from 'generated/prisma';
 import { CloudflareService } from 'src/cloudflare/cloudflare.service';
+import { GetStudentsQueryDto } from 'src/student/dto/student-query.dto';
+import { QueryEngine } from 'src/common/services/query.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly cloudflare: CloudflareService,
+    private qe: QueryEngine,
   ) {}
   //signup
   async signUp(dto: CreateUserDto) {
@@ -84,16 +87,35 @@ export class AuthService {
   }
 
   // get all
-  async getAllUsers() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true,
-        full_name: true,
-        email: true,
-        role: true,
-        expert_in: true,
-      },
+  async getAllUsers(raw: GetStudentsQueryDto) {
+    const q = this.qe.build<
+      Prisma.UserWhereInput,
+      Prisma.UserOrderByWithRelationInput
+    >(raw, {
+      searchable: ['full_name', 'email'],
+      filterable: ['full_name', 'email', 'role', 'is_active'],
+      defaultSort: 'created_at',
+      defaultLimit: 10,
     });
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where: { ...q.where, role: 'TEACHER' },
+        orderBy: q.orderBy,
+        skip: q.skip,
+        take: q.take,
+        select: {
+          id: true,
+          full_name: true,
+          email: true,
+          role: true,
+          is_active: true,
+        },
+      }),
+      this.prisma.user.count({ where: q.where }),
+    ]);
+
+    return this.qe.formatPaginatedResponse(data, total, q.page, q.limit);
   }
 
   //update

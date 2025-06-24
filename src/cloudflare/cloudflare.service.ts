@@ -40,4 +40,12 @@ export class CloudflareService {
   async deleteFilesFromPayload(payload: any, fields: string[]) {
     return this.fileManager.deleteFilesFromPayload(payload, fields);
   }
+
+  async updateFilesFromPayload(
+    input: Record<string, any>,
+    existing: Record<string, any>,
+    fields: string[],
+  ) {
+    return this.fileManager.updateFilesFromPayload(input, existing, fields);
+  }
 }

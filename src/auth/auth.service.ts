@@ -120,35 +120,35 @@ export class AuthService {
 
   //update
   async update(id: string, dto: UpdateUserDto) {
-    const existUser = await this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    if (!existUser) {
-      throw new UnauthorizedException('User not found');
-    }
-    const data: Prisma.UserUpdateInput = {};
-    if (dto.full_name) data.full_name = dto.full_name;
+    const existUser = await this.prisma.user.findUnique({ where: { id } });
+    if (!existUser) throw new UnauthorizedException('User not found');
 
-    /* ----------  Optional presigned upload URL ------------------- */
-    let uploadUrl: string | undefined;
-    if (dto.profile_photo) {
-      const { uploadUrl: url, fileName } = await this.cloudflare.getUploadUrl(
-        `users/${dto.profile_photo}`,
+    const { updatedPayload: hello, uploadUrls } =
+      await this.cloudflare.updateFilesFromPayload(
+        { profile_photo: dto.profile_photo },
+        { profile_photo: existUser.profile_photo },
+        ['profile_photo'],
       );
-      uploadUrl = url;
-      data.profile_photo = fileName;
-    }
+
+    const data: Prisma.UserUpdateInput = {
+      full_name: dto.full_name,
+      profile_photo: hello.profile_photo as string,
+    };
 
     const updated = await this.prisma.user.update({
       where: { id },
       data,
-      omit: { password: true },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        profile_photo: true,
+      },
     });
 
-    /* ----------  Return consistent response ---------------------- */
-    return uploadUrl ? { ...updated, upload_url: uploadUrl } : updated;
+    return uploadUrls?.['profile_photo']
+      ? { ...updated, upload_url: uploadUrls['profile_photo'] }
+      : updated;
   }
 
   //delete

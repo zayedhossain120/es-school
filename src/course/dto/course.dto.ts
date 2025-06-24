@@ -20,6 +20,10 @@ export class UpdateCourseDto {
   @IsOptional()
   @IsString()
   module?: string;
+
+  @IsOptional()
+  @IsString()
+  course_thumbnail?: string;
 }
 
 /* ---------- DTO for ?query parameters ------------------------------ */

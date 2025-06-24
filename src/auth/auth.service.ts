@@ -123,7 +123,7 @@ export class AuthService {
     const existUser = await this.prisma.user.findUnique({ where: { id } });
     if (!existUser) throw new UnauthorizedException('User not found');
 
-    const { updatedPayload: hello, uploadUrls } =
+    const { updatedPayload, uploadUrls } =
       await this.cloudflare.updateFilesFromPayload(
         { profile_photo: dto.profile_photo },
         { profile_photo: existUser.profile_photo },
@@ -132,7 +132,7 @@ export class AuthService {
 
     const data: Prisma.UserUpdateInput = {
       full_name: dto.full_name,
-      profile_photo: hello.profile_photo as string,
+      profile_photo: updatedPayload.profile_photo as string,
     };
 
     const updated = await this.prisma.user.update({

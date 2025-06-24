@@ -141,37 +141,40 @@ export class StudentService {
   //update student
   async update(id: string, dto: UpdateUserDto, currentUser: UserPayload) {
     /* ----------  Make sure the target user exists ---------------- */
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException('User not found');
+    const existUser = await this.prisma.user.findUnique({ where: { id } });
+    if (!existUser) throw new NotFoundException('User not found');
 
     /* ----------  Role-based access guard ------------------------- */
     if (currentUser.role === Role.STUDENT && currentUser.id !== id) {
       throw new ForbiddenException('You may update only your own profile.');
     }
 
-    /* ----------  Build update data ------------------------------- */
-    const data: Prisma.UserUpdateInput = {};
-    if (dto.full_name) data.full_name = dto.full_name;
-
-    /* ----------  Optional presigned upload URL ------------------- */
-    let uploadUrl: string | undefined;
-    if (dto.profile_photo) {
-      const { uploadUrl: url, fileName } = await this.cloudflare.getUploadUrl(
-        `users/${dto.profile_photo}`,
+    const { updatedPayload, uploadUrls } =
+      await this.cloudflare.updateFilesFromPayload(
+        { profile_photo: dto.profile_photo },
+        { profile_photo: existUser.profile_photo },
+        ['profile_photo'],
       );
-      uploadUrl = url;
-      data.profile_photo = fileName;
-    }
 
-    /* ----------  Execute update ---------------------------------- */
+    const data: Prisma.UserUpdateInput = {
+      full_name: dto.full_name,
+      profile_photo: updatedPayload.profile_photo as string,
+    };
+
     const updated = await this.prisma.user.update({
       where: { id },
       data,
-      omit: { password: true },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        profile_photo: true,
+      },
     });
 
-    /* ----------  Return consistent response ---------------------- */
-    return uploadUrl ? { ...updated, upload_url: uploadUrl } : updated;
+    return uploadUrls?.['profile_photo']
+      ? { ...updated, upload_url: uploadUrls['profile_photo'] }
+      : updated;
   }
 
   // update password

@@ -26,7 +26,7 @@ export class CourseService {
 
     if (dto.course_thumbnail) {
       const { uploadUrl: url, fileName } = await this.cloudflare.getUploadUrl(
-        `courses/${dto.course_thumbnail}`,
+        dto.course_thumbnail,
       );
       uploadUrl = url;
       thumbnail = fileName; // store only the key
@@ -92,6 +92,7 @@ export class CourseService {
     }
   }
 
+  // update course
   async updateCourse(
     id: string,
     dto: UpdateCourseDto,
@@ -103,10 +104,30 @@ export class CourseService {
       throw new UnauthorizedException('You can only update your own courses');
     }
 
-    return this.prisma.course.update({
+    const { updatedPayload, uploadUrls } =
+      await this.cloudflare.updateFilesFromPayload(
+        {
+          course_thumbnail: dto.course_thumbnail,
+        },
+        {
+          course_thumbnail: course.course_thumbnail,
+        },
+        ['course_thumbnail'],
+      );
+
+    const data: Prisma.CourseUpdateInput = {
+      ...dto,
+      course_thumbnail: updatedPayload.course_thumbnail as string,
+    };
+
+    const updated = await this.prisma.course.update({
       where: { id },
-      data: dto,
+      data: { ...data },
     });
+
+    return uploadUrls.course_thumbnail
+      ? { ...updated, upload_url: uploadUrls.course_thumbnail }
+      : updated;
   }
 
   // get a course by id

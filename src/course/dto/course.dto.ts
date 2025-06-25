@@ -9,7 +9,7 @@ export class CreateCourseDto {
 
   @IsOptional()
   @IsString()
-  course_thumbnail?: string;
+  course_thumbnail: string;
 }
 
 export class UpdateCourseDto {

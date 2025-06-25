@@ -14,13 +14,13 @@ export class CourseService {
     private qe: QueryEngine,
     private readonly cloudflare: CloudflareService,
   ) {}
+
   // create course
   async createCourse(dto: CreateCourseDto, currentUser: UserPayload) {
     if (currentUser.role !== Role.TEACHER) {
       throw new UnauthorizedException('Only teachers can create courses');
     }
 
-    /* ---------- optional thumbnail presign ------------------------ */
     let uploadUrl: string | undefined;
     let thumbnail: string | undefined;
 
@@ -29,10 +29,9 @@ export class CourseService {
         dto.course_thumbnail,
       );
       uploadUrl = url;
-      thumbnail = fileName; // store only the key
+      thumbnail = fileName;
     }
 
-    /* ---------- build data object --------------------------------- */
     const data: Prisma.CourseCreateInput = {
       title: dto.title,
       module: dto.module,
@@ -40,7 +39,6 @@ export class CourseService {
       ...(thumbnail && { course_thumbnail: thumbnail }),
     };
 
-    /* ---------- write to DB --------------------------------------- */
     const created = await this.prisma.course.create({
       data,
       select: {
@@ -51,7 +49,6 @@ export class CourseService {
       },
     });
 
-    /* ---------- return consistent response ------------------------ */
     return uploadUrl ? { ...created, upload_url: uploadUrl } : created;
   }
 
@@ -90,6 +87,15 @@ export class CourseService {
       console.error('CourseService.getAllCourse error ➜', err);
       throw err;
     }
+  }
+
+  // get my course
+  async myCourse(currentUser: UserPayload) {
+    return this.prisma.course.findMany({
+      where: {
+        teacher_id: currentUser.id,
+      },
+    });
   }
 
   // update course
@@ -146,7 +152,7 @@ export class CourseService {
       );
     }
 
-    return { ...course, coursetTumbnail };
+    return { ...course, course_thumbnail_url: coursetTumbnail };
   }
 
   // delete course
@@ -155,6 +161,10 @@ export class CourseService {
 
     if (!course || course.teacher_id !== currentUser.id) {
       throw new UnauthorizedException('You can only delete your own courses');
+    }
+
+    if (course.course_thumbnail) {
+      await this.cloudflare.deleteFile(course.course_thumbnail);
     }
 
     return this.prisma.course.delete({ where: { id } });

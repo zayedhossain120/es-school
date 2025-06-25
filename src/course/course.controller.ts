@@ -38,6 +38,14 @@ export class CourseController {
     return this.courseService.getAllCourse(raw);
   }
 
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.TEACHER)
+  @Get('me')
+  myCourse(@Req() req: Request) {
+    const currentUser = req.user as UserPayload;
+    return this.courseService.myCourse(currentUser);
+  }
+
   //get a course
   @Get(':id')
   getCourseById(@Param('id') id: string) {

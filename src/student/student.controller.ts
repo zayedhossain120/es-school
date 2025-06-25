@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
@@ -101,7 +102,13 @@ export class StudentController {
   @Roles(Role.TEACHER)
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Delete(':id')
-  delete(@Param('id') id: string) {
+  delete(@Param('id') id: string, @Req() req: Request) {
+    const currentUserId = req.user?.id;
+    if (id !== currentUserId) {
+      throw new UnauthorizedException(
+        'You are not permitted to delete this account',
+      );
+    }
     return this.studentService.delete(id);
   }
 }

@@ -158,11 +158,18 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
+    if (user.profile_photo) {
+      await this.cloudflare.deleteFile(user.profile_photo);
+    }
+
     await this.prisma.user.delete({
       where: { id },
     });
 
-    return { message: 'User deleted successfully' };
+    return {
+      message: 'User deleted successfully',
+      data: user,
+    };
   }
 
   // generate access token by user details

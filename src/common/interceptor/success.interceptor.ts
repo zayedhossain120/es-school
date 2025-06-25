@@ -22,42 +22,42 @@ interface SuccessResponse<T> {
   data: T;
 }
 
+interface ResponseWithOptionalMeta<T> {
+  data: T;
+  message?: string;
+  meta?: Meta;
+}
+
 @Injectable()
 export class SuccessResponseInterceptor<T>
   implements NestInterceptor<unknown, SuccessResponse<T>>
 {
   intercept(
     context: ExecutionContext,
-    next: CallHandler<T>,
+    next: CallHandler<T | ResponseWithOptionalMeta<T>>,
   ): Observable<SuccessResponse<T>> {
     const response = context.switchToHttp().getResponse<Response>();
+
     return next.handle().pipe(
-      map<T, SuccessResponse<T>>((data) => {
-        let responseData: T;
+      map((result): SuccessResponse<T> => {
+        let data: T;
         let message = 'Request successful';
         let meta: Meta | undefined;
 
-        if (typeof data === 'object' && data !== null) {
-          if ('data' in data) {
-            responseData = (data as any).data;
-            message = (data as any).message ?? message;
-          } else {
-            responseData = data as T;
-          }
-
-          if ('meta' in data) {
-            meta = (data as any).meta;
-          }
+        if (result && typeof result === 'object' && 'data' in result) {
+          data = result.data;
+          message = result.message ? result.message : message;
+          meta = result.meta;
         } else {
-          responseData = data as T;
+          data = result;
         }
 
         return {
           statusCode: response.statusCode,
           success: true,
           message,
-          ...(meta ? { meta } : {}),
-          data: responseData,
+          ...(meta && { meta }),
+          data,
         };
       }),
     );
